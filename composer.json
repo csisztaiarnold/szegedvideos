@@ -10,7 +10,8 @@
     ],
     "minimum-stability": "dev",
     "require": {
-        "madcoda/php-youtube-api": "1.2"
+        "madcoda/php-youtube-api": "1.2",
+        "illuminate/database": "^7.0@dev"
     },
     "autoload": {
         "classmap": [

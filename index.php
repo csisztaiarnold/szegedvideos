@@ -2,6 +2,21 @@
 require "bootstrap.php";
 $settings = parse_ini_file('.env');
 
+$capsule = new Illuminate\Database\Capsule\Manager;
+$capsule->addConnection([
+    'driver'    => $settings['DB_DRIVER'],
+    'host'      => $settings['DB_HOST'],
+    'database'  => $settings['DB_DATABASE'],
+    'username'  => $settings['DB_USER'],
+    'password'  => $settings['DB_PASSWORD'],
+    'charset'   => 'utf8',
+    'collation' => 'utf8_unicode_ci',
+    'prefix'    => '',
+]);
+
+$capsule->setAsGlobal();
+$capsule->bootEloquent();
+
 $search = [
     'q' => '',
     'part' => 'snippet',
@@ -33,6 +48,7 @@ foreach ($videos as $video) {
 }
 
 function getVideos($video_array) {
+    $videos = [];
     foreach ($video_array as $video) {
         $videos[] = [
             'id' => $video->id->videoId,
