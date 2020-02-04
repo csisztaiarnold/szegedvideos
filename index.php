@@ -4,14 +4,14 @@ $settings = parse_ini_file('.env');
 
 $capsule = new Illuminate\Database\Capsule\Manager;
 $capsule->addConnection([
-    'driver'    => $settings['DB_DRIVER'],
-    'host'      => $settings['DB_HOST'],
-    'database'  => $settings['DB_DATABASE'],
-    'username'  => $settings['DB_USER'],
-    'password'  => $settings['DB_PASSWORD'],
-    'charset'   => 'utf8',
+    'driver' => $settings['DB_DRIVER'],
+    'host' => $settings['DB_HOST'],
+    'database' => $settings['DB_DATABASE'],
+    'username' => $settings['DB_USER'],
+    'password' => $settings['DB_PASSWORD'],
+    'charset' => 'utf8',
     'collation' => 'utf8_unicode_ci',
-    'prefix'    => '',
+    'prefix' => '',
 ]);
 
 $capsule->setAsGlobal();
@@ -41,13 +41,14 @@ $videos_by_location = $youtube->searchAdvanced(array_merge($search, $search_by_l
 $videos = getVideos(array_merge($videos_by_keywords, $videos_by_location));
 
 foreach ($videos as $video) {
-    echo '<h1>' . $video['title'] . '</h1>';
-    echo '<h2>' . $video['published_at'] . '</h2>';
-    echo '<h3><a href="https://www.youtube.com/channel/' . $video['channel']['id'] . '">' . $video['channel']['title'] . '</a></h3>';
-    echo '<a href="https://www.youtube.com/watch?v=' . $video['id']. '"><img src="' . $video['thumbnail']['high']['url'] .'"></a><hr>';
+    echo '<h1>'.$video['title'].'</h1>';
+    echo '<h2>'.$video['published_at'].'</h2>';
+    echo '<h3><a href="https://www.youtube.com/channel/'.$video['channel']['id'].'">'.$video['channel']['title'].'</a></h3>';
+    echo '<a href="https://www.youtube.com/watch?v='.$video['id'].'"><img src="'.$video['thumbnail']['high']['url'].'"></a><hr>';
 }
 
-function getVideos($video_array) {
+function getVideos($video_array)
+{
     $videos = [];
     foreach ($video_array as $video) {
         $videos[] = [
