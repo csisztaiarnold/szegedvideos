@@ -24,8 +24,6 @@ $videos_by_location = $youtube->searchAdvanced(array_merge($search, $search_by_l
 
 $videos = parseVideos(array_merge($videos_by_keywords, $videos_by_location), $capsule);
 
-mail($settings['NOTIFICATION_EMAIL'], 'New videos!', $email_content);
-
 $email_content = '';
 if (!empty($videos)) {
     $capsule->table('videos')->insert($videos);
