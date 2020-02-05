@@ -1,21 +1,5 @@
 <?php
 require "bootstrap.php";
-$settings = parse_ini_file('.env');
-
-$capsule = new Illuminate\Database\Capsule\Manager;
-$capsule->addConnection([
-    'driver' => $settings['DB_DRIVER'],
-    'host' => $settings['DB_HOST'],
-    'database' => $settings['DB_DATABASE'],
-    'username' => $settings['DB_USER'],
-    'password' => $settings['DB_PASSWORD'],
-    'charset' => 'utf8',
-    'collation' => 'utf8_unicode_ci',
-    'prefix' => '',
-]);
-
-$capsule->setAsGlobal();
-$capsule->bootEloquent();
 
 $search = [
     'q' => '',
@@ -34,51 +18,35 @@ $search_by_location = [
     'locationRadius' => '30km',
 ];
 
-$youtube = new Madcoda\Youtube(array('key' => $settings['YOUTUBE_API_KEY']));
+$youtube = new Madcoda\Youtube(['key' => $settings['YOUTUBE_API_KEY']]);
 $videos_by_keywords = $youtube->searchAdvanced(array_merge($search, $search_by_keyword));
 $videos_by_location = $youtube->searchAdvanced(array_merge($search, $search_by_location));
 
-$videos = getVideos(array_merge($videos_by_keywords, $videos_by_location));
+$videos = parseVideos(array_merge($videos_by_keywords, $videos_by_location), $capsule);
+$capsule->table('videos')->insert($videos);
 
-foreach ($videos as $video) {
-    echo '<h1>'.$video['title'].'</h1>';
-    echo '<h2>'.$video['published_at'].'</h2>';
-    echo '<h3><a href="https://www.youtube.com/channel/'.$video['channel']['id'].'">'.$video['channel']['title'].'</a></h3>';
-    echo '<a href="https://www.youtube.com/watch?v='.$video['id'].'"><img src="'.$video['thumbnail']['high']['url'].'"></a><hr>';
-}
-
-function getVideos($video_array)
-{
+function parseVideos($video_array, $capsule) {
     $videos = [];
     foreach ($video_array as $video) {
-        $videos[] = [
-            'id' => $video->id->videoId,
-            'published_at' => $video->snippet->publishedAt,
-            'title' => $video->snippet->title,
-            'description' => $video->snippet->description,
-            'thumbnail' => [
-                'default' => [
-                    'url' => $video->snippet->thumbnails->default->url,
-                    'width' => $video->snippet->thumbnails->default->width,
-                    'height' => $video->snippet->thumbnails->default->height,
-                ],
-                'medium' => [
-                    'url' => $video->snippet->thumbnails->medium->url,
-                    'width' => $video->snippet->thumbnails->medium->width,
-                    'height' => $video->snippet->thumbnails->medium->height,
-                ],
-                'high' => [
-                    'url' => $video->snippet->thumbnails->high->url,
-                    'width' => $video->snippet->thumbnails->high->width,
-                    'height' => $video->snippet->thumbnails->high->height,
-                ],
-            ],
-            'channel' => [
-                'id' => $video->snippet->channelId,
-                'title' => $video->snippet->channelTitle,
-            ]
-        ];
+        if(!$capsule->table('videos')->where('video_id', $video->id->videoId)->get()->first()) {
+            $videos[] = [
+                'video_id' => $video->id->videoId,
+                'published_at' => $video->snippet->publishedAt,
+                'title' => $video->snippet->title,
+                'description' => $video->snippet->description,
+                'thumbnail_default_url' => $video->snippet->thumbnails->default->url,
+                'thumbnail_default_width' => $video->snippet->thumbnails->default->width,
+                'thumbnail_default_height' => $video->snippet->thumbnails->default->height,
+                'thumbnail_medium_url' => $video->snippet->thumbnails->medium->url,
+                'thumbnail_medium_width' => $video->snippet->thumbnails->medium->width,
+                'thumbnail_medium_height' => $video->snippet->thumbnails->medium->height,
+                'thumbnail_high_url' => $video->snippet->thumbnails->high->url,
+                'thumbnail_high_width' => $video->snippet->thumbnails->high->width,
+                'thumbnail_high_height' => $video->snippet->thumbnails->high->height,
+                'channel_id' => $video->snippet->channelId,
+                'channel_title' => $video->snippet->channelTitle,
+            ];
+        }
     }
     return $videos;
 }
-
