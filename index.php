@@ -23,7 +23,17 @@ $videos_by_keywords = $youtube->searchAdvanced(array_merge($search, $search_by_k
 $videos_by_location = $youtube->searchAdvanced(array_merge($search, $search_by_location));
 
 $videos = parseVideos(array_merge($videos_by_keywords, $videos_by_location), $capsule);
-$capsule->table('videos')->insert($videos);
+
+mail($settings['NOTIFICATION_EMAIL'], 'New videos!', $email_content);
+
+$email_content = '';
+if(!empty($videos)) {
+    $capsule->table('videos')->insert($videos);
+    foreach($videos as $video) {
+        $email_content .= "https://www.youtube.com/watch?v=" . $video['video_id'] . "\n";
+    }
+    mail($settings['NOTIFICATION_EMAIL'], 'New videos!', $email_content);
+}
 
 function parseVideos($video_array, $capsule) {
     $videos = [];
