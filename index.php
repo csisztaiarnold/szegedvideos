@@ -27,18 +27,19 @@ $videos = parseVideos(array_merge($videos_by_keywords, $videos_by_location), $ca
 mail($settings['NOTIFICATION_EMAIL'], 'New videos!', $email_content);
 
 $email_content = '';
-if(!empty($videos)) {
+if (!empty($videos)) {
     $capsule->table('videos')->insert($videos);
-    foreach($videos as $video) {
-        $email_content .= "https://www.youtube.com/watch?v=" . $video['video_id'] . "\n";
+    foreach ($videos as $video) {
+        $email_content .= $video['title']." - https://www.youtube.com/watch?v=".$video['video_id']."\n";
     }
     mail($settings['NOTIFICATION_EMAIL'], 'New videos!', $email_content);
 }
 
-function parseVideos($video_array, $capsule) {
+function parseVideos($video_array, $capsule)
+{
     $videos = [];
     foreach ($video_array as $video) {
-        if(!$capsule->table('videos')->where('video_id', $video->id->videoId)->get()->first()) {
+        if (!$capsule->table('videos')->where('video_id', $video->id->videoId)->get()->first()) {
             $videos[] = [
                 'video_id' => $video->id->videoId,
                 'published_at' => $video->snippet->publishedAt,
